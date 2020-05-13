@@ -6,7 +6,8 @@
 
 Shader::Shader(const char* vertexPath,const char* fragmentPath)
 {
-    // 1. retrieve the vertex/fragment source code from filePath
+    initializeOpenGLFunctions();
+//     1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
     std::string fragmentCode;
     std::ifstream vShaderFile;
@@ -36,6 +37,7 @@ Shader::Shader(const char* vertexPath,const char* fragmentPath)
     }
     const char* vShaderCode = vertexCode.c_str();
     const char * fShaderCode = fragmentCode.c_str();
+     std::cout << fShaderCode << std::endl;
     // 2. compile shaders
     unsigned int vertex, fragment;
     // vertex shader

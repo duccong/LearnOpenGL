@@ -40,7 +40,7 @@ void HelloTriangle::render()
             tmp2 = true;
         }
     }
-    glUniform4f(glGetUniformLocation(shaderProgram, "oColor"), 1-tmp, tmp, 1-tmp/2, 1.0f);
+//    glUniform4f(glGetUniformLocation(shaderProgram, "oColor"), 1-tmp, tmp, 1-tmp/2, 1.0f);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -165,8 +165,8 @@ void HelloTriangle::initOpenGL()
     // get the attribute location with glGetAttribLocation
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-//    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(3*sizeof(float)));
-//    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
 
 //    glBindBuffer(GL_ARRAY_BUFFER, 0);
 //    glBindVertexArray(0);

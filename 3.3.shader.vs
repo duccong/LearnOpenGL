@@ -1,10 +1,11 @@
-attribute highp vec4 qt_Vertex;
-attribute highp vec4 qt_MultiTexCoord0;
-uniform highp mat4 qt_ModelViewProjectionMatrix;
-varying highp vec4 qt_TexCoord0;
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 oColor;
 
-void main(void)
+out vec3 ourColor;
+
+void main()
 {
-    gl_Position = qt_ModelViewProjectionMatrix * qt_Vertex;
-    qt_TexCoord0 = qt_MultiTexCoord0;
+    gl_Position = vec4(aPos, 1.0);
+    ourColor = oColor;
 }
