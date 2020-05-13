@@ -27,13 +27,19 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
     openglwindow.cpp \
-    hellotriangle.cpp
+    hellotriangle.cpp \
+    shader.cpp
 
 HEADERS += \
     openglwindow.h \
-    hellotriangle.h
+    hellotriangle.h \
+    shader.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    3.3.shader.vs \
+    3.3.shader.fs

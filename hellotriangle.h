@@ -1,6 +1,7 @@
 #ifndef HELLOTRIANGLE_H
 #define HELLOTRIANGLE_H
 #include <openglwindow.h>
+#include <shader.h>
 
 class HelloTriangle : public OpenGLWindow
 {
@@ -23,6 +24,10 @@ private:
     GLuint VAO;
 
     GLuint shaderProgram;
+    float tmp;
+    bool tmp2;
+    bool isOpenGLInited;
+    Shader *ourShader;
 
     //    QOpenGLShaderProgram *m_program;
     //    int m_frame;

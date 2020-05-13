@@ -79,7 +79,7 @@ void OpenGLWindow::render(QPainter *painter)
 
 void OpenGLWindow::initialize()
 {
-    needsInitialize = false;
+    qDebug("OpenGLWindow::initialize()");
 }
 
 void OpenGLWindow::render()
@@ -131,7 +131,7 @@ void OpenGLWindow::renderNow()
     if (!isExposed())
         return;
 
-//    bool needsInitialize = false;
+    bool needsInitialize = false;
 
     if (!m_context) {
         m_context = new QOpenGLContext(this);

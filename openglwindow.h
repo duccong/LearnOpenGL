@@ -85,9 +85,9 @@ protected:
 
     void exposeEvent(QExposeEvent *event) override;
 
-public:
+private:
     bool m_animating;
-    bool needsInitialize;
+//    bool needsInitialize;
 
     QOpenGLContext *m_context;
     QOpenGLPaintDevice *m_device;

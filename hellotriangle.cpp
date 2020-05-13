@@ -2,38 +2,63 @@
 
 HelloTriangle::HelloTriangle()
 {
-
+    isOpenGLInited = false;
+    tmp = 0.0;
+    tmp2 = false;
+    setAnimating(true);
 }
 
 void HelloTriangle::initialize()
 {
+    qDebug("HelloTriangle::initialize()");
+
+
     initOpenGL();
 }
 
 void HelloTriangle::render()
 {
 
-    qDebug("HelloTriangle::render()");
-    m_context->makeCurrent(this);
+//    qDebug("HelloTriangle::render()");
+//    m_context->makeCurrent(this);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(shaderProgram);
+//    glUseProgram(shaderProgram);
+    ourShader->use();
+    // update the uniform color
+//    float timeValue = glTim();
 
-//    glDrawArrays(GL_TRIANGLES, 0, 3);
+    if (tmp2){
+        tmp = tmp - 0.01;
+        if (tmp <= 0){
+            tmp2 = false;
+        }
+    } else {
+        tmp = tmp + 0.01;
+        if (tmp >= 1.0){
+            tmp2 = true;
+        }
+    }
+    glUniform4f(glGetUniformLocation(shaderProgram, "oColor"), 1-tmp, tmp, 1-tmp/2, 1.0f);
+
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 }
 
 void HelloTriangle::initOpenGL()
 {
+    if (isOpenGLInited){
+        return;
+    }
 //    m_context->makeCurrent(this);
     qDebug("HelloTriangle::initOpenGL()");
-    initializeOpenGLFunctions();
+
+    int nrAttributes;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+    qDebug("Maximum nr of vertex attributes supported: %d", nrAttributes);
 
     float vertices[] = {
-//        -0.5f, -0.5f, 0.0f,
-//         0.5f, -0.5f, 0.0f,
-//         0.0f,  0.5f, 0.0f
 //        0.5f,  0.5f, 0.0f,  // top right
 //        0.5f, -0.5f, 0.0f,  // bottom right
 //        -0.5f, -0.5f, 0.0f,  // bottom left
@@ -52,20 +77,20 @@ void HelloTriangle::initOpenGL()
 
     const char *vertexShaderSource = "#version 330 core\n"
                                      "layout (location = 0) in vec3 aPos;\n"
-                                     "layout (location = 1) in vec3 iColor;\n"
-                                     "out vec3 oColor;\n"
+//                                     "uniform vec4 ourColor;\n"
+//                                     "out vec3 oColor;\n"
                                      "void main()\n"
                                      "{\n"
                                      "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-                                     "   oColor = iColor;\n"
+//                                     "   oColor = iColor;\n"
                                      "}\0";
 
     const char *fragmentShaderSource = "#version 330 core\n"
-                                       "in vec3 oColor;\n"
+                                       "uniform vec4 oColor;\n"
                                        "out vec4 FragColor;\n"
                                        "void main()\n"
                                        "{\n"
-                                       "   FragColor = vec4(oColor, 1.0f);\n"
+                                       "   FragColor = oColor;\n"
                                        "}\n\0";
 
     int  success;
@@ -132,23 +157,28 @@ void HelloTriangle::initOpenGL()
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
         qDebug("ERROR::SHADER::program::COMPILATION_FAILED %s\n",infoLog);
     }
-
+//    char *shaderVs = "C:/Users/cong.tran/Documents/LearningOpenG/3.3.shader.vs";
+//    char *shaderFs = "C:/Users/cong.tran/Documents/LearningOpenG/3.3.shader.fs";
+//    Shader *ourShader2("C:/Users/cong.tran/Documents/LearningOpenG/3.3.shader.vs", "C:/Users/cong.tran/Documents/LearningOpenG/3.3.shader.fs");
+    ourShader = new Shader("C:/Users/cong.tran/Documents/LearningOpenGL/3.3.shader.vs", "C:/Users/cong.tran/Documents/LearningOpenGL/3.3.shader.fs");
     // [4] Set Data to Array
+    // get the attribute location with glGetAttribLocation
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(3*sizeof(float)));
-    glEnableVertexAttribArray(1);
+//    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(3*sizeof(float)));
+//    glEnableVertexAttribArray(1);
 
 //    glBindBuffer(GL_ARRAY_BUFFER, 0);
 //    glBindVertexArray(0);
 
-    glUseProgram(shaderProgram);
+//    glUseProgram(shaderProgram);
     glViewport(0,0,width(),height());
 
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+//    glDeleteShader(vertexShader);
+//    glDeleteShader(fragmentShader);
 
     //
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    isOpenGLInited = true;
 }
