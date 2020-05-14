@@ -21,6 +21,7 @@ public:
     void setBool(const std::string &name, bool value);
     void setInt(const std::string &name, int value);
     void setFloat(const std::string &name, float value);
+    void setUInt(const std::string &name, unsigned int value);
 private:
     void checkCompileErrors(unsigned int shader, std::string type);
 };

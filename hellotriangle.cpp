@@ -75,6 +75,12 @@ void HelloTriangle::initOpenGL()
         0, 4, 6    // second triangle
     };
 
+    float texCoords[] = {
+        0.0f, 0.0f,  // lower-left corner
+        1.0f, 0.0f,  // lower-right corner
+        0.5f, 1.0f   // top-center corner
+    };
+
     const char *vertexShaderSource = "#version 330 core\n"
                                      "layout (location = 0) in vec3 aPos;\n"
 //                                     "uniform vec4 ourColor;\n"
@@ -121,46 +127,9 @@ void HelloTriangle::initOpenGL()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    //[1] Vertex Shader
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        qDebug("ERROR::SHADER::VERTEX::COMPILATION_FAILED %s\n",infoLog);
-    }
-
-    //[2] Fragment Shader
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        qDebug("ERROR::SHADER::Fragment::COMPILATION_FAILED %s\n",infoLog);
-    }
-
-    //[3] Shader program
-//    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    if(!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        qDebug("ERROR::SHADER::program::COMPILATION_FAILED %s\n",infoLog);
-    }
-//    char *shaderVs = "C:/Users/cong.tran/Documents/LearningOpenG/3.3.shader.vs";
-//    char *shaderFs = "C:/Users/cong.tran/Documents/LearningOpenG/3.3.shader.fs";
-//    Shader *ourShader2("C:/Users/cong.tran/Documents/LearningOpenG/3.3.shader.vs", "C:/Users/cong.tran/Documents/LearningOpenG/3.3.shader.fs");
+    //[1-2-3] init in ourShader
     ourShader = new Shader("C:/Users/cong.tran/Documents/LearningOpenGL/3.3.shader.vs", "C:/Users/cong.tran/Documents/LearningOpenGL/3.3.shader.fs");
+
     // [4] Set Data to Array
     // get the attribute location with glGetAttribLocation
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);

@@ -2,12 +2,13 @@
 #include <QApplication>
 #include <QSurfaceFormat>
 #include <hellotriangle.h>
+#include <textures.h>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     //[1]
-    HelloTriangle w;
+    Textures w;
 
     //[2]
     // set SurfaceFormat
