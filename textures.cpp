@@ -20,14 +20,11 @@ void Textures::render()
 {
 
     qDebug("HelloTriangle::render()");
-//    m_context->makeCurrent(this);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT  | GL_DEPTH_BUFFER_BIT  );
 
-//    glUseProgram(shaderProgram);
-    ourShader->use();
+//    ourShader->use();
     // update the uniform color
-//    float timeValue = glTim();
 
     if (tmp2){
         tmp = tmp - 0.01;
@@ -40,14 +37,6 @@ void Textures::render()
             tmp2 = true;
         }
     }
-//    ourShader->setInt("texture1", 0);
-//    ourShader->setInt("texture2", 1);
-
-//    glActiveTexture(GL_TEXTURE0);
-//    glBindTexture(GL_TEXTURE_2D, texture);
-
-//    glActiveTexture(GL_TEXTURE1);
-//    glBindTexture(GL_TEXTURE_2D, texture2);
 
 //    glUniform4f(glGetUniformLocation(shaderProgram, "oColor"), 1-tmp, tmp, 1-tmp/2, 1.0f);
 
@@ -80,7 +69,7 @@ void Textures::initOpenGL()
 
     unsigned int indices[] = {  // note that we start from 0!
         0, 1, 3,   // first triangle
-        4, 2, 3    // second triangle
+        1, 2, 3    // second triangle
     };
 
     float texCoords[] = {
@@ -128,7 +117,7 @@ void Textures::initOpenGL()
 
 //    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
 
-    QImage* img = new QImage("C:/Users/cong.tran/Documents/LearningOpenGL/container.jpg");
+    QImage* img = new QImage(path+ "test.png");
 
 //    QImage* img = new QImage("C:/Users/cong.tran/Documents/LearningOpenGL/test.png");
     // QImage use 32 bit. but glTexImage2D need 24 bit
@@ -160,7 +149,7 @@ void Textures::initOpenGL()
 
 //    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
 
-    QImage* img2 = new QImage("C:/Users/cong.tran/Documents/LearningOpenGL/wall.jpg");
+    QImage* img2 = new QImage(path+ "wall.jpg");
 
 //    QImage* img2 = new QImage("C:/Users/cong.tran/Documents/LearningOpenGL/test.png");
     // QImage use 32 bit. but glTexImage2D need 24 bit
@@ -178,7 +167,9 @@ void Textures::initOpenGL()
     }
 
     //[1-2-3] init in ourShader
-    ourShader = new Shader("C:/Users/cong.tran/Documents/LearningOpenGL/3.4.textures.vs", "C:/Users/cong.tran/Documents/LearningOpenGL/3.4.textures.fs");
+    QString sTmp = path + "3.4.textures.vs";
+    QString sTmp2 = path + "3.4.textures.fs";
+    ourShader = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
     // [4] Set Data to Array
     // get the attribute location with glGetAttribLocation
@@ -188,8 +179,6 @@ void Textures::initOpenGL()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
-    std::cout << glGetError() << std::endl;
-
 
     // Load texture
     ourShader->use();
@@ -197,21 +186,17 @@ void Textures::initOpenGL()
     ourShader->setInt("texture2", 1);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
 
-//    glUseProgram(shaderProgram);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
     glViewport(0,0,width(),height());
-
-
     //
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     isOpenGLInited = true;
-//    glDeleteShader(vertexShader);
-//    glDeleteShader(fragmentShader);
+
     delete img;
     delete img2;
 }

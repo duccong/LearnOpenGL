@@ -77,7 +77,6 @@ void Shader::setInt(const std::string &name, int value)
 {
     qDebug("Shader::setInt: %d",value );
     glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
-    std::cout << glGetError() << std::endl;
 }
 // ------------------------------------------------------------------------
 void Shader::setFloat(const std::string &name, float value)
@@ -88,11 +87,8 @@ void Shader::setFloat(const std::string &name, float value)
 void Shader::setUInt(const std::string &name, unsigned int value)
 {
     qDebug("Shader::setUInt: %d",value );
-    std::cout << value <<  glGetError() << std::endl;
     GLint location = glGetUniformLocation(ID, name.c_str());
-    std::cout << glGetError() << std::endl;
     glUniform1i(location, value);
-    std::cout << glGetError() << std::endl;
 }
 
 void Shader::checkCompileErrors(unsigned int shader, std::string type)

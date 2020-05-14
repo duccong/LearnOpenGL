@@ -92,6 +92,8 @@ private:
     QOpenGLContext *m_context;
     QOpenGLPaintDevice *m_device;
     QSurfaceFormat *m_fmt;
+public:
+    QString path;
 
 };
 //! [1]
