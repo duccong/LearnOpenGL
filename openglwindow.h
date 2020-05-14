@@ -53,6 +53,8 @@
 #include <QtGui/QWindow>
 #include <QtGui/QOpenGLFunctions_3_3_Core>
 #include <QDebug>
+#include <QMatrix4x4>
+#include <QScreen>
 
 QT_BEGIN_NAMESPACE
 class QPainter;

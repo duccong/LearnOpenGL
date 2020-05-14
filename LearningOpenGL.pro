@@ -29,13 +29,15 @@ SOURCES += \
     openglwindow.cpp \
     hellotriangle.cpp \
     shader.cpp \
-    textures.cpp
+    textures.cpp \
+    transform.cpp
 
 HEADERS += \
     openglwindow.h \
     hellotriangle.h \
     shader.h \
-    textures.h
+    textures.h \
+    transform.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -45,6 +47,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 DISTFILES += \
     3.3.shader.vs \
     3.3.shader.fs \
+    5.1.transform.fs \
+    5.1.transform.vs \
     wall.jpg \
     container.jpg \
     3.4.textures.fs \

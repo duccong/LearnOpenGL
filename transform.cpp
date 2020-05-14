@@ -1,14 +1,15 @@
-#include "textures.h"
+#include "transform.h"
 
-Textures::Textures()
+transform::transform()
 {
     isOpenGLInited = false;
     tmp = 0.0;
     tmp2 = false;
     setAnimating(false);
+//    setAnimating(true);
 }
 
-void Textures::initialize()
+void transform::initialize()
 {
     qDebug("HelloTriangle::initialize()");
 
@@ -16,36 +17,40 @@ void Textures::initialize()
     initOpenGL();
 }
 
-void Textures::render()
+void transform::render()
 {
 
-    qDebug("HelloTriangle::render()");
+//    qDebug("HelloTriangle::render()");
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT  | GL_DEPTH_BUFFER_BIT  );
 
 //    ourShader->use();
     // update the uniform color
 
-    if (tmp2){
-        tmp = tmp - 0.01;
-        if (tmp <= 0){
-            tmp2 = false;
-        }
-    } else {
-        tmp = tmp + 0.01;
-        if (tmp >= 1.0){
-            tmp2 = true;
-        }
-    }
-
+//    if (tmp2){
+//        tmp = tmp - 0.01;
+//        if (tmp <= 0){
+//            tmp2 = false;
+//        }
+//    } else {
+//        tmp = tmp + 0.01;
+//        if (tmp >= 1.0){
+//            tmp2 = true;
+//        }
+//    }
+    tmp ++;
+    QMatrix4x4 matrix;
+//    matrix.translate(0, 0, -2);
+//    matrix.rotate(100.0f * tmp / screen()->refreshRate(), 0, 0, 1);
+    matrix.rotate(90, 0, 0, 1);
+    ourShader->setMat4("transform",matrix.data());
 //    glUniform4f(glGetUniformLocation(shaderProgram, "oColor"), 1-tmp, tmp, 1-tmp/2, 1.0f);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 //    glDrawArrays(GL_TRIANGLES,0,4);
-    std::cout << glGetError() << std::endl;
 }
 
-void Textures::initOpenGL()
+void transform::initOpenGL()
 {
     if (isOpenGLInited){
         return;
@@ -167,8 +172,8 @@ void Textures::initOpenGL()
     }
 
     //[1-2-3] init in ourShader
-    QString sTmp = path + "3.4.textures.vs";
-    QString sTmp2 = path + "3.4.textures.fs";
+    QString sTmp = path + "5.1.transform.vs";
+    QString sTmp2 = path + "5.1.transform.fs";
     ourShader = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
     // [4] Set Data to Array
@@ -201,8 +206,9 @@ void Textures::initOpenGL()
     delete img2;
 }
 
-void Textures::freePoint()
+void transform::freePoint()
 {
 
 }
+
 
