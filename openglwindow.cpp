@@ -64,8 +64,8 @@ OpenGLWindow::OpenGLWindow(QWindow *parent)
     , m_device(0)
 {
     setSurfaceType(QWindow::OpenGLSurface);
-//    path = "C:/Users/cong.tran/Documents/LearningOpenGL/";
-    path = "/Users/congductran/Project/LearnOpenGL/";
+    path = "C:/Users/cong.tran/Documents/LearningOpenGL/";
+//    path = "/Users/congductran/Project/LearnOpenGL/";
 }
 //! [1]
 

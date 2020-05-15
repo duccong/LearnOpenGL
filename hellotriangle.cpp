@@ -42,7 +42,8 @@ void HelloTriangle::render()
     }
 //    glUniform4f(glGetUniformLocation(shaderProgram, "oColor"), 1-tmp, tmp, 1-tmp/2, 1.0f);
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+//    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES,0,6);
 
 }
 
@@ -122,10 +123,10 @@ void HelloTriangle::initOpenGL()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // EBO
-    unsigned int EBO; // element buffer
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+//    unsigned int EBO; // element buffer
+//    glGenBuffers(1, &EBO);
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     //[1-2-3] init in ourShader
     ourShader = new Shader("C:/Users/cong.tran/Documents/LearningOpenGL/3.3.shader.vs", "C:/Users/cong.tran/Documents/LearningOpenGL/3.3.shader.fs");

@@ -4,12 +4,13 @@
 #include <hellotriangle.h>
 #include <textures.h>
 #include <transform.h>
+#include <coordinatesystems.h>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     //[1]
-    transform w;
+    CoordinateSystems w;
 
     //[2]
     // set SurfaceFormat

@@ -30,14 +30,16 @@ SOURCES += \
     hellotriangle.cpp \
     shader.cpp \
     textures.cpp \
-    transform.cpp
+    transform.cpp \
+    coordinatesystems.cpp
 
 HEADERS += \
     openglwindow.h \
     hellotriangle.h \
     shader.h \
     textures.h \
-    transform.h
+    transform.h \
+    coordinatesystems.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -54,4 +56,8 @@ DISTFILES += \
     3.4.textures.fs \
     3.4.textures.vs \
     test.PNG \
-    test2.PNG
+    test2.PNG \
+    5.1.transform.vs \
+    5.1.transform.fs \
+    6.1.coordinate_systems.fs \
+    6.1.coordinate_systems.vs

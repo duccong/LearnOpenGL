@@ -1,6 +1,6 @@
-#include "transform.h"
+#include "coordinatesystems.h"
 
-transform::transform()
+CoordinateSystems::CoordinateSystems()
 {
     isOpenGLInited = false;
     tmp = 0.0;
@@ -9,7 +9,7 @@ transform::transform()
     setAnimating(true);
 }
 
-void transform::initialize()
+void CoordinateSystems::initialize()
 {
     qDebug("HelloTriangle::initialize()");
 
@@ -17,7 +17,7 @@ void transform::initialize()
     initOpenGL();
 }
 
-void transform::render()
+void CoordinateSystems::render()
 {
 
 //    qDebug("HelloTriangle::render()");
@@ -26,49 +26,86 @@ void transform::render()
 
 //    ourShader->use();
 
-    if (tmp2){
-        tmp = tmp - 0.01;
-        if (tmp <= -1){
-            tmp2 = false;
-        }
-    } else {
-        tmp = tmp + 0.01;
-        if (tmp >= 1.0){
-            tmp2 = true;
-        }
-    }
-//    tmp++;
+//    if (tmp2){
+//        tmp = tmp - 0.01;
+//        if (tmp <= -1){
+//            tmp2 = false;
+//        }
+//    } else {
+//        tmp = tmp + 0.01;
+//        if (tmp >= 1.0){
+//            tmp2 = true;
+//        }
+//    }
+    tmp++;
 
-    QMatrix4x4 matrix;
+//    QMatrix4x4 matrix;
 
 //    matrix.perspective(60.0f, 4.0f/3.0f, 0.1f, 100.0f);
-    matrix.translate(tmp, 0 , 0);
+//    matrix.translate(tmp, 0 , 0);
 //    matrix.translate(0, tmp, 0);
 //    matrix.rotate(100.0f * tmp / screen()->refreshRate(), 1, 1, 1);
 //    matrix.rotate(180, 0, 0,1);
 //    ourShader->setMat4("transform",matrix.data());
+    // create transformations
+//    QMatrix4x4 model; // make sure to initialize matrix to identity matrix first
+    QMatrix4x4 view;
+    QMatrix4x4 projection;
+//    model.rotate(100.0f * tmp / screen()->refreshRate(), 1.0f, 1.0f, 0.0f);
+    view.translate(0.0f, 0.0f, -3.0f);
+    projection.perspective(45.0f, width()/height(), 0.1f, 100.0f);
+    // retrieve the matrix uniform locations
+//    unsigned int modelLoc = glGetUniformLocation(ourShader->ID, "model");
+    unsigned int viewLoc  = glGetUniformLocation(ourShader->ID, "view");
+    // pass them to the shaders (3 different ways)
+//    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data());
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
+    // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
+    ourShader->setMat4("projection", projection.data());
 
-//    float test[] = {
-//        1, 0, 0, 0,
-//        0, 1, 0, 1,
-//        0, 0, 1, 0,
-//        0, 0, 0, 1
-//    };
+    QVector3D cubePositions[] = {
+        QVector3D( 0.0f,  0.0f,  0.0f),
+        QVector3D( 2.0f,  5.0f, -15.0f),
+        QVector3D(-1.5f, -2.2f, -2.5f),
+        QVector3D(-3.8f, -2.0f, -12.3f),
+        QVector3D( 2.4f, -0.4f, -3.5f),
+        QVector3D(-1.7f,  3.0f, -7.5f),
+        QVector3D( 1.3f, -2.0f, -2.5f),
+        QVector3D( 1.5f,  2.0f, -2.5f),
+        QVector3D( 1.5f,  0.2f, -1.5f),
+        QVector3D(-1.3f,  1.0f, -1.5f)
+    };
 
-//    QMatrix4x4 mat4(test);
-//    qDebug() << matrix << endl;
-//    qDebug() << mat4 << endl;
+    for(unsigned int i = 0; i < 5; i++)
+    {
+        QMatrix4x4 model;
+        model.translate(cubePositions[i]);
+        float angle = 20.0f * i;
+        if (! (i % 2) ){
+            model.rotate(100.0f * tmp / screen()->refreshRate(), 1.0f, 0.5f, 0.25f);
+        } else {
+            model.rotate(45 , 1.0f, 0.3f, 0.5f);
+        }
 
-    ourShader->setMat4("transform",matrix.data());
+        ourShader->setMat4("model", model.data());
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+
+//    ourShader->setMat4("transform",matrix.data());
+
+//    glDrawArrays(GL_TRIANGLES, 0, 36);
+//    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void transform::initOpenGL()
+void CoordinateSystems::initOpenGL()
 {
     if (isOpenGLInited){
         return;
     }
+
+    glEnable(GL_DEPTH_TEST);
+
 //    m_context->makeCurrent(this);
     qDebug("HelloTriangle::initOpenGL()");
 
@@ -76,25 +113,63 @@ void transform::initOpenGL()
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
     qDebug("Maximum nr of vertex attributes supported: %d", nrAttributes);
 
-//    };
+
+//    float vertices[] = {
+//            // positions          // colors           // texture coords
+//             0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+//             0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+//            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+//            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left
+//             0.25f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right2
+//        };
+
     float vertices[] = {
-            // positions          // colors           // texture coords
-             0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-             0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left
-             0.25f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right2
-        };
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
 
     unsigned int indices[] = {  // note that we start from 0!
         0, 1, 3,   // first triangle
         1, 2, 3    // second triangle
-    };
-
-    float texCoords[] = {
-        0.0f, 0.0f,  // lower-left corner
-        1.0f, 0.0f,  // lower-right corner
-        0.5f, 1.0f   // top-center corner
     };
 
     //[0] VAO, VBO, EBO, texture
@@ -168,7 +243,7 @@ void transform::initOpenGL()
 
 //    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
 
-    QImage* img2 = new QImage(path+ "test2.png");
+    QImage* img2 = new QImage(path+ "container.png");
 
 //    QImage* img2 = new QImage("C:/Users/cong.tran/Documents/LearningOpenGL/test.png");
     // QImage use 32 bit. but glTexImage2D need 24 bit
@@ -186,20 +261,21 @@ void transform::initOpenGL()
     }
 
     //[1-2-3] init in ourShader
-    QString sTmp = path + "5.1.transform.vs";
-    QString sTmp2 = path + "5.1.transform.fs";
+    QString sTmp = path + "6.1.coordinate_systems.vs";
+    QString sTmp2 = path + "6.1.coordinate_systems.fs";
     ourShader = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
     // [4] Set Data to Array
     // get the attribute location with glGetAttribLocation
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    // Load texture
+
+    // ===================== Load our shader
     ourShader->use();
     ourShader->setInt("texture1", 0);
     ourShader->setInt("texture2", 1);
@@ -209,6 +285,8 @@ void transform::initOpenGL()
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture);
+
+
 
     glViewport(0,0,width(),height());
     //
@@ -220,9 +298,7 @@ void transform::initOpenGL()
     delete img2;
 }
 
-void transform::freePoint()
+void CoordinateSystems::freePoint()
 {
 
 }
-
-
