@@ -55,6 +55,8 @@
 #include <QDebug>
 #include <QMatrix4x4>
 #include <QScreen>
+#include <QtMath>
+#include <QKeyEvent>
 
 QT_BEGIN_NAMESPACE
 class QPainter;

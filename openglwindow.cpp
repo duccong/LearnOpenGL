@@ -113,6 +113,14 @@ bool OpenGLWindow::event(QEvent *event)
     case QEvent::UpdateRequest:
         renderNow();
         return true;
+    case QEvent::KeyPress:{
+        if (event->type()){
+            QKeyEvent* key = static_cast<QKeyEvent*>(event);
+            qDebug()<< key->key();
+        }
+    }
+        return true;
+
     default:
         return QWindow::event(event);
     }

@@ -5,12 +5,13 @@
 #include <textures.h>
 #include <transform.h>
 #include <coordinatesystems.h>
+#include <camera.h>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     //[1]
-    CoordinateSystems w;
+    Camera w;
 
     //[2]
     // set SurfaceFormat

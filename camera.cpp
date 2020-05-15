@@ -1,15 +1,15 @@
-#include "coordinatesystems.h"
+#include "camera.h"
 
-CoordinateSystems::CoordinateSystems()
+Camera::Camera()
 {
     isOpenGLInited = false;
     tmp = 0.0;
     tmp2 = false;
-//    setAnimating(false);
-    setAnimating(true);
+    setAnimating(false);
+//    setAnimating(true);
 }
 
-void CoordinateSystems::initialize()
+void Camera::initialize()
 {
     qDebug("HelloTriangle::initialize()");
 
@@ -17,7 +17,7 @@ void CoordinateSystems::initialize()
     initOpenGL();
 }
 
-void CoordinateSystems::render()
+void Camera::render()
 {
 
 //    qDebug("HelloTriangle::render()");
@@ -37,17 +37,25 @@ void CoordinateSystems::render()
 //            tmp2 = true;
 //        }
 //    }
-    tmp++;
+    tmp+=0.01;
 
 //    QMatrix4x4 matrix;
 
-//    QMatrix4x4 view;
-//    QMatrix4x4 projection;
-//    view.translate(0.0f, 0.0f, -3.0f);
-//    projection.perspective(45.0f, width()/height(), 0.1f, 100.0f);
-//    unsigned int viewLoc  = glGetUniformLocation(ourShader->ID, "view");
-//    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
-//    ourShader->setMat4("projection", projection.data());
+    QMatrix4x4 view;
+    unsigned int viewLoc  = glGetUniformLocation(ourShader->ID, "view");
+
+    const float radius = 10.0f;
+    float camX = qSin(tmp) * radius;
+    float camZ = qCos(tmp) * radius;
+
+    QVector3D cameraPos(0.0f, 0.0f,  3.0f);
+    QVector3D cameraFront(0.0f, 0.0f, -1.0f);
+    QVector3D cameraUp(0.0f, 1.0f,  0.0f);
+
+    view.lookAt(QVector3D(camX, 0.0, camZ), QVector3D(0.0, 0.0, 0.0),QVector3D(0.0, 1.0, 0.0));
+//    view.lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
 
     QVector3D cubePositions[] = {
         QVector3D( 0.0f,  0.0f,  0.0f),
@@ -84,7 +92,7 @@ void CoordinateSystems::render()
 //    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void CoordinateSystems::initOpenGL()
+void Camera::initOpenGL()
 {
     if (isOpenGLInited){
         return;
@@ -98,16 +106,6 @@ void CoordinateSystems::initOpenGL()
     int nrAttributes;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
     qDebug("Maximum nr of vertex attributes supported: %d", nrAttributes);
-
-
-//    float vertices[] = {
-//            // positions          // colors           // texture coords
-//             0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-//             0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-//            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-//            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left
-//             0.25f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right2
-//        };
 
     float vertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -247,8 +245,8 @@ void CoordinateSystems::initOpenGL()
     }
 
     //[1-2-3] init in ourShader
-    QString sTmp = path + "6.1.coordinate_systems.vs";
-    QString sTmp2 = path + "6.1.coordinate_systems.fs";
+    QString sTmp = path + "7.3.camera.vs";
+    QString sTmp2 = path + "7.3.camera.fs";
     ourShader = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
     // [4] Set Data to Array
@@ -260,16 +258,39 @@ void CoordinateSystems::initOpenGL()
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    // ===================== CameraDirection
+    QVector3D cameraPos(0.0f, 0.0f, 3.0f);
+    QVector3D cameraTarget(0.0f, 0.0f, 0.0f);
+
+    QVector3D cameraDirection = cameraPos - cameraTarget;
+    cameraDirection.normalize();
+
+    // Right axis - x-axis
+    QVector3D up(0.0f, 1.0f, 0.0f);
+    QVector3D cameraRight ;//= glm::normalize(glm::cross(up, cameraDirection));
+    cameraRight.crossProduct(up,cameraDirection).normalize();
+
+    // Up axis - y-axis
+    QVector3D cameraUp;
+    cameraUp.crossProduct(cameraDirection, cameraRight).normalize();
+
+//    cameraDirection = cameraDirection.normalized();
+
     // setup view
     ourShader->use();
-    QMatrix4x4 view;
+//    QMatrix4x4 view;
     QMatrix4x4 projection;
-    view.translate(0.0f, 0.0f, -3.0f);
+//    view.translate(0.0f, 0.0f, -3.0f);
 //    projection.ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
     projection.perspective(45.0f, width()/height(), 0.1f, 100.0f);
-    unsigned int viewLoc  = glGetUniformLocation(ourShader->ID, "view");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
+//    unsigned int viewLoc  = glGetUniformLocation(ourShader->ID, "viewTmp");
+//    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
     ourShader->setMat4("projection", projection.data());
+
+//    QMatrix4x4 viewCamera;
+//    viewCamera.lookAt(QVector3D(0.0f, 0.0f, 3.0f),
+//                      QVector3D(0.0f, 0.0f, 0.0f),
+//                      QVector3D(0.0f, 1.0f, 0.0f));
 
     // ===================== Load our shader
 //    ourShader->use();
@@ -294,7 +315,8 @@ void CoordinateSystems::initOpenGL()
     delete img2;
 }
 
-void CoordinateSystems::freePoint()
+void Camera::freePoint()
 {
 
 }
+

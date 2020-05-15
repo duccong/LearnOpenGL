@@ -31,7 +31,8 @@ SOURCES += \
     shader.cpp \
     textures.cpp \
     transform.cpp \
-    coordinatesystems.cpp
+    coordinatesystems.cpp \
+    camera.cpp
 
 HEADERS += \
     openglwindow.h \
@@ -39,7 +40,8 @@ HEADERS += \
     shader.h \
     textures.h \
     transform.h \
-    coordinatesystems.h
+    coordinatesystems.h \
+    camera.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -60,4 +62,6 @@ DISTFILES += \
     5.1.transform.vs \
     5.1.transform.fs \
     6.1.coordinate_systems.fs \
-    6.1.coordinate_systems.vs
+    6.1.coordinate_systems.vs \
+    7.3.camera.fs \
+    7.3.camera.vs
