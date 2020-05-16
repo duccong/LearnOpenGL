@@ -26,24 +26,23 @@ private:
     GLuint shaderProgram;
     float tmp;
     bool tmp2;
+    float fTmp2;
     bool isOpenGLInited;
     Shader *ourShader;
     unsigned int uiTmp;
     unsigned int texture;
     unsigned int texture2;
     void freePoint();
+    float cameraSpeed ;// = 2.5f * deltaTime;
 
-//    QVector3D cameraPos;
-//    QVector3D cameraTarget;
-//    QVector3D cameraDirection;
-//    QVector3D up;
-//    // cameraRight - x-axis
-//    QVector3D cameraRight ;
-//    // cameraUp - y-axis
-//    QVector3D cameraUp;
+    QVector3D *cameraPos;
+    QVector3D *cameraFront;
+    QVector3D *cameraUp;
 
-    //    QOpenGLShaderProgram *m_program;
-    //    int m_frame;
+
+public slots:
+    void slotKeyPress(QKeyEvent *key);
+
 };
 
 #endif // CAMERA_H

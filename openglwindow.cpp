@@ -64,8 +64,8 @@ OpenGLWindow::OpenGLWindow(QWindow *parent)
     , m_device(0)
 {
     setSurfaceType(QWindow::OpenGLSurface);
-    path = "C:/Users/cong.tran/Documents/LearningOpenGL/";
-//    path = "/Users/congductran/Project/LearnOpenGL/";
+//    path = "C:/Users/cong.tran/Documents/LearningOpenGL/";
+    path = "/Users/congductran/Project/LearnOpenGL/";
 }
 //! [1]
 
@@ -114,13 +114,11 @@ bool OpenGLWindow::event(QEvent *event)
         renderNow();
         return true;
     case QEvent::KeyPress:{
-        if (event->type()){
-            QKeyEvent* key = static_cast<QKeyEvent*>(event);
-            qDebug()<< key->key();
-        }
+        QKeyEvent* key = static_cast<QKeyEvent*>(event);
+//        qDebug()<< "QEvent::KeyPress: " << key->key();
+        emit sigKeyPress(key);
     }
         return true;
-
     default:
         return QWindow::event(event);
     }

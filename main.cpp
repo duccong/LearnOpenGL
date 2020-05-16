@@ -19,6 +19,8 @@ int main(int argc, char *argv[])
     fmt->setRenderableType(QSurfaceFormat::OpenGL);
     fmt->setVersion(3,3);
     fmt->setProfile(QSurfaceFormat::CoreProfile);
+    fmt->setDepthBufferSize(24);
+//    QSurfaceFormat::setDefaultFormat(format);
     w.setSurfaceFormat(fmt);
 
     //[3]

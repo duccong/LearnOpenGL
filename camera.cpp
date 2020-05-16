@@ -6,7 +6,10 @@ Camera::Camera()
     tmp = 0.0;
     tmp2 = false;
     setAnimating(false);
+    connect(this,SIGNAL(sigKeyPress(QKeyEvent*)),this,SLOT(slotKeyPress(QKeyEvent*)));
+//    cameraSpeed = 2.5f * 10;
 //    setAnimating(true);
+
 }
 
 void Camera::initialize()
@@ -37,7 +40,7 @@ void Camera::render()
 //            tmp2 = true;
 //        }
 //    }
-    tmp+=0.01;
+//    tmp+=0.01;
 
 //    QMatrix4x4 matrix;
 
@@ -45,15 +48,15 @@ void Camera::render()
     unsigned int viewLoc  = glGetUniformLocation(ourShader->ID, "view");
 
     const float radius = 10.0f;
-    float camX = qSin(tmp) * radius;
-    float camZ = qCos(tmp) * radius;
+    float camX = qSin(fTmp2) * radius;
+    float camZ = qCos(fTmp2) * radius;
 
-    QVector3D cameraPos(0.0f, 0.0f,  3.0f);
-    QVector3D cameraFront(0.0f, 0.0f, -1.0f);
-    QVector3D cameraUp(0.0f, 1.0f,  0.0f);
+//    QVector3D cameraPos(0.0f, 0.0f,  3.0f);
+//    QVector3D cameraFront(0.0f, 0.0f, -1.0f);
+//    QVector3D cameraUp(0.0f, 1.0f,  0.0f);
 
-    view.lookAt(QVector3D(camX, 0.0, camZ), QVector3D(0.0, 0.0, 0.0),QVector3D(0.0, 1.0, 0.0));
-//    view.lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+//    view.lookAt(QVector3D(camX, 0.0, camZ), QVector3D(0.0, 0.0, 0.0),QVector3D(0.0, 1.0, 0.0));
+    view.lookAt(*cameraPos+QVector3D(camX, 0.0, camZ), (*cameraPos + *cameraFront)-QVector3D(camX, 0.0, camZ), *cameraUp);
 
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
 
@@ -259,20 +262,25 @@ void Camera::initOpenGL()
     glEnableVertexAttribArray(2);
 
     // ===================== CameraDirection
-    QVector3D cameraPos(0.0f, 0.0f, 3.0f);
-    QVector3D cameraTarget(0.0f, 0.0f, 0.0f);
+//    QVector3D cameraPos(0.0f, 0.0f, 3.0f);
+//    QVector3D cameraTarget(0.0f, 0.0f, 0.0f);
 
-    QVector3D cameraDirection = cameraPos - cameraTarget;
-    cameraDirection.normalize();
+//    QVector3D cameraDirection = cameraPos - cameraTarget;
+//    cameraDirection.normalize();
 
-    // Right axis - x-axis
-    QVector3D up(0.0f, 1.0f, 0.0f);
-    QVector3D cameraRight ;//= glm::normalize(glm::cross(up, cameraDirection));
-    cameraRight.crossProduct(up,cameraDirection).normalize();
+//    // Right axis - x-axis
+//    QVector3D up(0.0f, 1.0f, 0.0f);
+//    QVector3D cameraRight ;//= glm::normalize(glm::cross(up, cameraDirection));
+//    cameraRight.crossProduct(up,cameraDirection).normalize();
 
-    // Up axis - y-axis
-    QVector3D cameraUp;
-    cameraUp.crossProduct(cameraDirection, cameraRight).normalize();
+//    // Up axis - y-axis
+//    QVector3D cameraUp;
+//    cameraUp.crossProduct(cameraDirection, cameraRight).normalize();
+
+    cameraPos   = new QVector3D(0.0f, 0.0f,  3.0f);
+    cameraFront = new QVector3D(0.0f, 0.0f, -1.0f);
+    cameraUp    = new QVector3D(0.0f, 1.0f,  0.0f);
+    cameraSpeed = 60/screen()->refreshRate();
 
 //    cameraDirection = cameraDirection.normalized();
 
@@ -318,5 +326,49 @@ void Camera::initOpenGL()
 void Camera::freePoint()
 {
 
+}
+
+void Camera::slotKeyPress(QKeyEvent *key)
+{
+    qDebug()<< "Camera::KeyPress: " << key->key();
+    switch (key->key()) {
+    case Qt::Key_Up:
+        qDebug()<< "Camera::KeyPress: Key_Up";
+        *cameraPos += (cameraSpeed) * (*cameraFront);
+        break;
+    case Qt::Key_Down:
+        qDebug()<< "Camera::KeyPress: Key_Down";
+        *cameraPos -= cameraSpeed * (*cameraFront);
+        qDebug()<< *cameraPos;
+        break;
+    case Qt::Key_Left:{
+        qDebug()<< "Camera::KeyPress: Key_Left";
+        QVector3D tmp;
+        qDebug()<< "cameraFront" << *cameraFront;
+        qDebug()<< "cameraUp" << *cameraUp;
+        qDebug()<< "cameraPos" << *cameraPos;
+        tmp = tmp.crossProduct(*cameraFront,*cameraUp);
+//        tmp.normalize();
+
+         qDebug()<< tmp;
+         tmp.normalize();
+         qDebug()<< tmp;
+        fTmp2 -=0.1;
+
+        *cameraPos -= tmp * cameraSpeed;
+        qDebug()<< *cameraPos;
+        break;
+    }
+
+    case Qt::Key_Right:{
+        qDebug()<< "Camera::KeyPress: Key_Right";
+        QVector3D tmp2;
+        fTmp2 +=0.1;
+        tmp2 = tmp2.crossProduct(*cameraFront,*cameraUp);
+        *cameraPos += tmp2.normalized() * cameraSpeed;
+        break;
+    }
+    }
+    requestUpdate();
 }
 

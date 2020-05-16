@@ -84,6 +84,9 @@ public slots:
     void renderLater();
     void renderNow();
 
+signals:
+    void sigKeyPress(QKeyEvent *keyPress);
+
 protected:
     bool event(QEvent *event) override;
 
