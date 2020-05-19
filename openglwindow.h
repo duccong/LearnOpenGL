@@ -86,6 +86,7 @@ public slots:
 
 signals:
     void sigKeyPress(QKeyEvent *keyPress);
+    void sigMousePress(QEvent *event);
 
 protected:
     bool event(QEvent *event) override;
@@ -99,6 +100,9 @@ private:
     QOpenGLContext *m_context;
     QOpenGLPaintDevice *m_device;
     QSurfaceFormat *m_fmt;
+
+    float lastX, lastY;
+    bool isPress;
 public:
     QString path;
 

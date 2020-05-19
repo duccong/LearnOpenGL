@@ -64,8 +64,11 @@ OpenGLWindow::OpenGLWindow(QWindow *parent)
     , m_device(0)
 {
     setSurfaceType(QWindow::OpenGLSurface);
-//    path = "C:/Users/cong.tran/Documents/LearningOpenGL/";
-    path = "/Users/congductran/Project/LearnOpenGL/";
+    path = "C:/Users/cong.tran/Documents/LearningOpenGL/";
+//    path = "/Users/congductran/Project/LearnOpenGL/";
+    lastX = width()/2;
+    lastY = height()/2;
+    isPress = false;
 }
 //! [1]
 
@@ -109,6 +112,7 @@ void OpenGLWindow::renderLater()
 
 bool OpenGLWindow::event(QEvent *event)
 {
+
     switch (event->type()) {
     case QEvent::UpdateRequest:
         renderNow();
@@ -117,6 +121,18 @@ bool OpenGLWindow::event(QEvent *event)
         QKeyEvent* key = static_cast<QKeyEvent*>(event);
 //        qDebug()<< "QEvent::KeyPress: " << key->key();
         emit sigKeyPress(key);
+    }
+        return true;
+    case QEvent::MouseButtonPress: {
+        sigMousePress(event);
+    }
+        return true;
+    case QEvent::MouseButtonRelease: {
+        sigMousePress(event);
+    }
+        return true;
+    case QEvent::MouseMove: {
+        sigMousePress(event);
     }
         return true;
     default:

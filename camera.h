@@ -27,6 +27,8 @@ private:
     float tmp;
     bool tmp2;
     float fTmp2;
+    bool isMousePress;
+
     bool isOpenGLInited;
     Shader *ourShader;
     unsigned int uiTmp;
@@ -34,14 +36,24 @@ private:
     unsigned int texture2;
     void freePoint();
     float cameraSpeed ;// = 2.5f * deltaTime;
+    float yaw;
+    float pitch;
+    float tmpYaw;
+    float tmpPitch;
+    float lastX;
+    float lastY;
+    float sensitivity;
+    float fov;
 
     QVector3D *cameraPos;
     QVector3D *cameraFront;
     QVector3D *cameraUp;
+    QVector3D *cameraDirection;
 
 
 public slots:
     void slotKeyPress(QKeyEvent *key);
+    void slotMousePress(QEvent *event);
 
 };
 

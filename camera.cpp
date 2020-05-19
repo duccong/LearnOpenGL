@@ -5,10 +5,18 @@ Camera::Camera()
     isOpenGLInited = false;
     tmp = 0.0;
     tmp2 = false;
+    isMousePress = false;
     setAnimating(false);
     connect(this,SIGNAL(sigKeyPress(QKeyEvent*)),this,SLOT(slotKeyPress(QKeyEvent*)));
+    connect(this,SIGNAL(sigMousePress(QEvent*)),this,SLOT(slotMousePress(QEvent*)));
 //    cameraSpeed = 2.5f * 10;
-//    setAnimating(true);
+    yaw = -90.0f;
+    pitch = 0;
+    sensitivity = 0.00001f;
+    lastX = width()/2;
+    lastY = height()/2;
+
+    setAnimating(true);
 
 }
 
@@ -23,26 +31,17 @@ void Camera::initialize()
 void Camera::render()
 {
 
+
 //    qDebug("HelloTriangle::render()");
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT  | GL_DEPTH_BUFFER_BIT  );
 
-//    ourShader->use();
-
-//    if (tmp2){
-//        tmp = tmp - 0.01;
-//        if (tmp <= -1){
-//            tmp2 = false;
-//        }
-//    } else {
-//        tmp = tmp + 0.01;
-//        if (tmp >= 1.0){
-//            tmp2 = true;
-//        }
-//    }
-//    tmp+=0.01;
+    tmp+=1;
 
 //    QMatrix4x4 matrix;
+
+    QMatrix4x4 projection;
+    projection.perspective(qRadiansToDegrees(fov), width()/height(), 0.1f, 100.0f);
 
     QMatrix4x4 view;
     unsigned int viewLoc  = glGetUniformLocation(ourShader->ID, "view");
@@ -51,13 +50,20 @@ void Camera::render()
     float camX = qSin(fTmp2) * radius;
     float camZ = qCos(fTmp2) * radius;
 
-//    QVector3D cameraPos(0.0f, 0.0f,  3.0f);
-//    QVector3D cameraFront(0.0f, 0.0f, -1.0f);
-//    QVector3D cameraUp(0.0f, 1.0f,  0.0f);
-
 //    view.lookAt(QVector3D(camX, 0.0, camZ), QVector3D(0.0, 0.0, 0.0),QVector3D(0.0, 1.0, 0.0));
-    view.lookAt(*cameraPos+QVector3D(camX, 0.0, camZ), (*cameraPos + *cameraFront)-QVector3D(camX, 0.0, camZ), *cameraUp);
+//    view.lookAt(*cameraPos+QVector3D(camX, 0.0, camZ), (*cameraPos + *cameraFront)-QVector3D(camX, 0.0, camZ), *cameraUp);
 
+    // [] YAW, PITCH
+
+    QVector3D cameraDirection ;
+    cameraDirection.setX( qCos(qRadiansToDegrees(yaw)) * qCos(qRadiansToDegrees(pitch)));
+    cameraDirection.setY( qSin(qRadiansToDegrees(pitch)));
+    cameraDirection.setZ( qSin(qRadiansToDegrees(yaw)) * qCos(qRadiansToDegrees(pitch)));
+    cameraDirection.normalize();
+    // ![]
+
+//    view.lookAt(*cameraPos, (*cameraPos + *cameraFront), *cameraUp);
+    view.lookAt(*cameraPos, *cameraPos + cameraDirection, *cameraUp);
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
 
     QVector3D cubePositions[] = {
@@ -277,10 +283,10 @@ void Camera::initOpenGL()
 //    QVector3D cameraUp;
 //    cameraUp.crossProduct(cameraDirection, cameraRight).normalize();
 
-    cameraPos   = new QVector3D(0.0f, 0.0f,  3.0f);
+    cameraPos   = new QVector3D(0.0f, 0.0f,  10.0f);
     cameraFront = new QVector3D(0.0f, 0.0f, -1.0f);
     cameraUp    = new QVector3D(0.0f, 1.0f,  0.0f);
-    cameraSpeed = 60/screen()->refreshRate();
+    cameraSpeed = 24/screen()->refreshRate();
 
 //    cameraDirection = cameraDirection.normalized();
 
@@ -334,11 +340,13 @@ void Camera::slotKeyPress(QKeyEvent *key)
     switch (key->key()) {
     case Qt::Key_Up:
         qDebug()<< "Camera::KeyPress: Key_Up";
-        *cameraPos += (cameraSpeed) * (*cameraFront);
+
+        *cameraPos -= (cameraSpeed) * (*cameraFront);
         break;
     case Qt::Key_Down:
         qDebug()<< "Camera::KeyPress: Key_Down";
-        *cameraPos -= cameraSpeed * (*cameraFront);
+
+        *cameraPos += cameraSpeed * (*cameraFront);
         qDebug()<< *cameraPos;
         break;
     case Qt::Key_Left:{
@@ -348,14 +356,10 @@ void Camera::slotKeyPress(QKeyEvent *key)
         qDebug()<< "cameraUp" << *cameraUp;
         qDebug()<< "cameraPos" << *cameraPos;
         tmp = tmp.crossProduct(*cameraFront,*cameraUp);
-//        tmp.normalize();
-
-         qDebug()<< tmp;
-         tmp.normalize();
-         qDebug()<< tmp;
+        tmp.normalize();
         fTmp2 -=0.1;
 
-        *cameraPos -= tmp * cameraSpeed;
+        *cameraPos += tmp * cameraSpeed;
         qDebug()<< *cameraPos;
         break;
     }
@@ -365,10 +369,82 @@ void Camera::slotKeyPress(QKeyEvent *key)
         QVector3D tmp2;
         fTmp2 +=0.1;
         tmp2 = tmp2.crossProduct(*cameraFront,*cameraUp);
-        *cameraPos += tmp2.normalized() * cameraSpeed;
+
+        *cameraPos -= tmp2.normalized() * cameraSpeed;
         break;
+    }
+    default: {
+        qDebug()<< "Camera::KeyPress: default" << key->text();
+        if (key->text().compare("a") == 0 ){
+            yaw   -= 0.0001f;
+        }
+        if (key->text().compare("d") == 0 ){
+            yaw   += 0.0001f;
+        }
+        if (key->text().compare("s") == 0 ){
+            pitch   -= 0.0001f;
+        }
+        if (key->text().compare("w") == 0 ){
+            pitch   += 0.0001f;
+        }
+        if (key->text().compare("w") == 0 ){
+            pitch   += 0.0001f;
+        }
     }
     }
     requestUpdate();
+}
+
+void Camera::slotMousePress(QEvent *event)
+{
+    QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+    switch (event->type()) {
+    case QEvent::MouseButtonPress: {
+
+        isMousePress = true;
+        lastX = mouseEvent->x();
+        lastY = mouseEvent->y();
+        tmpYaw = yaw;
+        tmpPitch = pitch;
+        qDebug()<< "Camera::MouseButtonPress: " << mouseEvent->x() << ","<< mouseEvent->y();
+    }
+        break;
+    case QEvent::MouseButtonRelease: {
+        isMousePress = false;
+//        qDebug()<< "Camera::MouseButtonRelease: " << event;
+    }
+        break;
+    case QEvent::MouseMove: {
+        if (isMousePress){
+//            qDebug()<< "Camera::MouseMove: " << event;
+            float xoffset = mouseEvent->x() - lastX;
+            float yoffset = mouseEvent->y() - lastY;
+            qDebug()<< "Camera::MouseMove: " << xoffset;
+             qDebug()<< "Camera::MouseMove: " << yoffset;
+
+            xoffset *= sensitivity;
+            yoffset *= sensitivity;
+
+            fov -= (float)yoffset;
+            if (fov < 1.0f)
+                fov = 1.0f;
+            if (fov > 45.0f)
+                fov = 45.0f;
+
+            yaw = tmpYaw;
+            pitch = tmpPitch;
+            yaw   -= xoffset;
+            pitch -= yoffset;
+
+            if(pitch > 89.0f)
+                pitch = 89.0f;
+            if(pitch < -89.0f)
+                pitch = -89.0f;
+        }
+        break;
+    }
+    default:
+        return;
+    }
 }
 
