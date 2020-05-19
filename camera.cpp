@@ -283,7 +283,7 @@ void Camera::initOpenGL()
 //    QVector3D cameraUp;
 //    cameraUp.crossProduct(cameraDirection, cameraRight).normalize();
 
-    cameraPos   = new QVector3D(0.0f, 0.0f,  10.0f);
+    cameraPos   = new QVector3D(5.0f, 0.0f,  -30.0f);
     cameraFront = new QVector3D(0.0f, 0.0f, -1.0f);
     cameraUp    = new QVector3D(0.0f, 1.0f,  0.0f);
     cameraSpeed = 24/screen()->refreshRate();
