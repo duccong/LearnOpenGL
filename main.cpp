@@ -6,12 +6,13 @@
 #include <transform.h>
 #include <coordinatesystems.h>
 #include <camera.h>
+#include <lightingcolor.h>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     //[1]
-    Camera w;
+    LightingColor w;
 
     //[2]
     // set SurfaceFormat

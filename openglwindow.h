@@ -57,6 +57,7 @@
 #include <QScreen>
 #include <QtMath>
 #include <QKeyEvent>
+#include <qmath.h>
 
 QT_BEGIN_NAMESPACE
 class QPainter;

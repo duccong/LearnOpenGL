@@ -32,7 +32,9 @@ SOURCES += \
     textures.cpp \
     transform.cpp \
     coordinatesystems.cpp \
-    camera.cpp
+    camera.cpp \
+    cameraobject.cpp \
+    lightingcolor.cpp
 
 HEADERS += \
     openglwindow.h \
@@ -41,7 +43,9 @@ HEADERS += \
     textures.h \
     transform.h \
     coordinatesystems.h \
-    camera.h
+    camera.h \
+    cameraobject.h \
+    lightingcolor.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -64,4 +68,8 @@ DISTFILES += \
     6.1.coordinate_systems.fs \
     6.1.coordinate_systems.vs \
     7.3.camera.fs \
-    7.3.camera.vs
+    7.3.camera.vs \
+    1.colors.vs \
+    1.colors.fs \
+    1.light_cube.vs \
+    1.light_cube.fs
