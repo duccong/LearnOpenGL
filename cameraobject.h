@@ -1,6 +1,7 @@
 #ifndef CAMERAOBJECT_H
 #define CAMERAOBJECT_H
 #include <QVector3D>
+#include <QMatrix4x4>
 #include <qmath.h>
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
@@ -39,7 +40,7 @@ public:
     float MouseSensitivity;
     float Zoom;
 
-    QVector4D GetViewMatrix();
+    QMatrix4x4 GetViewMatrix();
 private:
      void updateCameraVectors();
 };

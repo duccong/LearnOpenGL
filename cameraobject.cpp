@@ -5,7 +5,8 @@ CameraObject::CameraObject()
 
 }
 // constructor with vectors
-CameraObject::CameraObject(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+
+CameraObject::CameraObject(QVector3D position = QVector3D(0.0f, 0.0f, 0.0f), QVector3D up = QVector3D(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(QVector3D(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
 {
     Position = position;
     WorldUp = up;
@@ -14,32 +15,34 @@ CameraObject::CameraObject(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm
     updateCameraVectors();
 }
 // constructor with scalar values
-CameraObject::CameraObject(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+CameraObject::CameraObject(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(QVector3D(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
 {
     Position = QVector3D(posX, posY, posZ);
-    WorldUp = glm::vec3(upX, upY, upZ);
+    WorldUp = QVector3D(upX, upY, upZ);
     Yaw = yaw;
     Pitch = pitch;
     updateCameraVectors();
 }
 
-QVector4D CameraObject::GetViewMatrix()
+QMatrix4x4 CameraObject::GetViewMatrix()
 {
-    QVector4D view;
-    return view.lookAt(Position, Position + Front, Up);
+    // matrix
+    QMatrix4x4 view;
+    view.lookAt(Position, Position + Front, Up);
+    return view;
 }
 
 void CameraObject::updateCameraVectors()
 {
     // calculate the new Front vector
     QVector3D front;
-    front.x = cos(qRadiansToDegrees(Yaw)) * cos(qRadiansToDegrees(Pitch));
-    front.y = sin(qRadiansToDegrees(Pitch));
-    front.z = sin(qRadiansToDegrees(Yaw)) * cos(qRadiansToDegrees(Pitch));
-    Front = glm::normalize(front);
+    front.setX( qCos(qRadiansToDegrees(Yaw)) * qCos(qRadiansToDegrees(Pitch)));
+    front.setY( qSin(qRadiansToDegrees(Pitch)));
+    front.setZ( qSin(qRadiansToDegrees(Yaw)) * qCos(qRadiansToDegrees(Pitch)));
+    front.normalize();
     // also re-calculate the Right and Up vector
-    Right = glm::normalize(glm::cross(Front, WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-    Up    = glm::normalize(glm::cross(Right, Front));
+    Right.crossProduct(Front, WorldUp).normalize();  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+    Up.crossProduct(Right, Front).normalize();
 }
 
 //    // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
