@@ -8,12 +8,13 @@
 #include <camera.h>
 #include <lightingcolor.h>
 #include <basiclighting.h>
+#include <lightingmaterials.h>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     //[1]
-    BasicLighting w;
+    LightingMaterials w;
 
     //[2]
     // set SurfaceFormat

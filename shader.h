@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <QtGui/QOpenGLFunctions_3_3_Core>
+#include <QVector3D>
 
 class Shader : public QOpenGLFunctions_3_3_Core
 {
@@ -25,6 +26,7 @@ public:
     void setVec2(const std::string &name, const GLfloat *value);
     void setVec2(const std::string &name, float x, float y) ;
     void setVec3(const std::string &name, const GLfloat *value) ;
+    void setVec3(const std::string &name, const QVector3D value) ;
     void setVec3(const std::string &name, float x, float y, float z);
     void setVec4(const std::string &name, const GLfloat *value);
     void setVec4(const std::string &name, float x, float y, float z, float w);

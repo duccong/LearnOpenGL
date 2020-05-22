@@ -1,10 +1,12 @@
-#include "basiclighting.h"
+#include "lightingmaterials.h"
 
-BasicLighting::BasicLighting()
+LightingMaterials::LightingMaterials()
 {
     isOpenGLInited = false;
     tmp = 0.0;
     tmp2 = false;
+    fTmp3 = 0.0f;
+    fTmp4 = 0.0f;
     isMousePress = false;
     setAnimating(false);
     connect(this,SIGNAL(sigKeyPress(QKeyEvent*)),this,SLOT(slotKeyPress(QKeyEvent*)));
@@ -24,7 +26,7 @@ BasicLighting::BasicLighting()
 
 }
 
-void BasicLighting::initialize()
+void LightingMaterials::initialize()
 {
     qDebug("HelloTriangle::initialize()");
 
@@ -32,7 +34,7 @@ void BasicLighting::initialize()
     initOpenGL();
 }
 
-void BasicLighting::render()
+void LightingMaterials::render()
 {
 
 
@@ -42,9 +44,10 @@ void BasicLighting::render()
 
     tmp+=1;
 //    fTmp2 += 0.01f;
+    fTmp3 += 0.001f;
 
     QMatrix4x4 projection;
-    projection.perspective(45, width()/height(), 0.1f, 100.0f);
+    projection.perspective(30, width()/height(), 0.1f, 100.0f);
 
     QMatrix4x4 view,viewCamera;
 
@@ -65,13 +68,13 @@ void BasicLighting::render()
     // ![]
 
 //    view.lookAt(*cameraPos, (*cameraPos + *cameraFront), *cameraUp);
-    viewCamera.lookAt(*cameraPos, *cameraPos + cameraDirection, *cameraUp);
-//     viewCamera.lookAt(QVector3D(camX, 0.0,camZ), QVector3D(0.0, 0.0, 0.0),QVector3D(0.0, 1.0, 0.0));
+//    viewCamera.lookAt(*cameraPos, *cameraPos + cameraDirection, *cameraUp);
+     viewCamera.lookAt(QVector3D(camX, 0.0,camZ), QVector3D(0.0, 0.0, 0.0),QVector3D(0.0, 1.0, 0.0));
 
 //    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
 
     QVector3D cubePositions[] = {
-        QVector3D( -0.5f,  0.0f,  0.0f),
+//        QVector3D( -0.5f,  0.0f,  0.0f),
 //        QVector3D( 2.0f,  5.0f, -15.0f),
 //        QVector3D(-1.5f, -2.2f, -2.5f),
 //        QVector3D(-3.8f, -2.0f, -12.3f),
@@ -81,12 +84,22 @@ void BasicLighting::render()
 //        QVector3D( 1.5f,  2.0f, -2.5f),
 //        QVector3D( 1.5f,  0.2f, -1.5f),
 //        QVector3D(-1.3f,  1.0f, -1.5f)
+        QVector3D( -0.5f,  -1.0f,  0.0f),
     };
+
+    QVector3D lightColor;
+    lightColor.setX(qSin(1/*fTmp3*/ * 2.0f));
+    lightColor.setY(qSin(1/*fTmp3*/ * 0.7f));
+    lightColor.setZ(qSin(1/*fTmp3*/ * 1.3f));
+
+    QVector3D diffuseColor = lightColor   * (0.5f);
+    QVector3D ambientColor = diffuseColor * (0.2f);
 
     for(unsigned int i = 0; i < sizeof(cubePositions)/sizeof(*cubePositions); i++)
     {
         QMatrix4x4 model;
-        model.translate(cubePositions[i]);
+        model.translate(QVector3D( fTmp4,  0.0f,  0.0f));
+//        model.translate(cubePositions[i]);
         float angle = 20.0f * i;
 //        model.rotate(45 , 1.0f, 0.3f, 0.5f);
         if (i%2){
@@ -104,10 +117,22 @@ void BasicLighting::render()
         lightingShader->setMat4("view", viewCamera.data());
 //        model.translate(-0.5f,0.0f,0.0f);
 
-        lightingShader->setVec3("lightPos", 1.2f, 1.0f, 2.0f);
+//        lightingShader->setVec3("lightPos", 1.2f, 1.0f, 2.0f);
         lightingShader->setVec3("viewPos",viewCamera.data());
 
         lightingShader->setMat4("model", model.data());
+
+        lightingShader->setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        lightingShader->setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        lightingShader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+        lightingShader->setFloat("material.shininess", 32.0f);
+
+
+        lightingShader->setVec3("light.ambient",  ambientColor);
+        lightingShader->setVec3("light.diffuse",  diffuseColor.x(),diffuseColor.y(),diffuseColor.z()); // darken diffuse light a bit
+        lightingShader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        lightingShader->setVec3("light.position",1.2f, 1.0f, 2.0f);
+
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -135,7 +160,7 @@ void BasicLighting::render()
 //    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void BasicLighting::initOpenGL()
+void LightingMaterials::initOpenGL()
 {
     if (isOpenGLInited){
         return;
@@ -224,14 +249,14 @@ void BasicLighting::initOpenGL()
 //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     //[1-2-3] init in ourShader
-    QString sTmp = path + "2.2.light_cube.vs";
-    QString sTmp2 = path + "2.2.light_cube.fs";
+    QString sTmp = path + "3.1.light_cube.vs";
+    QString sTmp2 = path + "3.1.light_cube.fs";
 //    ourShader = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
     lightCubeShader = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
-    sTmp = path + "2.2.basic_lighting.vs";
-    sTmp2 = path + "2.2.basic_lighting.fs";
+    sTmp = path + "3.1.materials.vs";
+    sTmp2 = path + "3.1.materials.fs";
 
     lightingShader  = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
@@ -301,12 +326,12 @@ void BasicLighting::initOpenGL()
 //    delete img2;
 }
 
-void BasicLighting::freePoint()
+void LightingMaterials::freePoint()
 {
 
 }
 
-void BasicLighting::slotKeyPress(QKeyEvent *key)
+void LightingMaterials::slotKeyPress(QKeyEvent *key)
 {
     qDebug()<< "Camera::KeyPress: " << key->key();
     switch (key->key()) {
@@ -374,12 +399,24 @@ void BasicLighting::slotKeyPress(QKeyEvent *key)
         if (key->text().compare("x") == 0 ){
             fov   -= 1.5f;
         }
+        if (key->text().compare("o") == 0 ){
+            fTmp4   += 0.5f;
+            qDebug()<< "Camera::KeyPress: fTmp4" << fTmp4;
+        }
+        if (key->text().compare("p") == 0 ){
+            fTmp4   -= 0.5f;
+            qDebug()<< "Camera::KeyPress: fTmp4" << fTmp4;
+        }
     }
     }
+    if (fov < 1.0f)
+        fov = 1.0f;
+    if (fov > 45.0f)
+        fov = 45.0f;
     requestUpdate();
 }
 
-void BasicLighting::slotMousePress(QEvent *event)
+void LightingMaterials::slotMousePress(QEvent *event)
 {
     QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
     switch (event->type()) {
@@ -433,3 +470,4 @@ void BasicLighting::slotMousePress(QEvent *event)
         return;
     }
 }
+

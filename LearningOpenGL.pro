@@ -35,7 +35,8 @@ SOURCES += \
     camera.cpp \
     cameraobject.cpp \
     lightingcolor.cpp \
-    basiclighting.cpp
+    basiclighting.cpp \
+    lightingmaterials.cpp
 
 HEADERS += \
     openglwindow.h \
@@ -47,7 +48,8 @@ HEADERS += \
     camera.h \
     cameraobject.h \
     lightingcolor.h \
-    basiclighting.h
+    basiclighting.h \
+    lightingmaterials.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -78,4 +80,8 @@ DISTFILES += \
     2.2.basic_lighting.fs \
     2.2.basic_lighting.vs \
     2.2.light_cube.fs \
-    2.2.light_cube.vs
+    2.2.light_cube.vs \
+    3.1.materials.vs \
+    3.1.materials.fs \
+    3.1.light_cube.vs \
+    3.1.light_cube.fs
