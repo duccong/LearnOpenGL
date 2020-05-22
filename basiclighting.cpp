@@ -1,6 +1,6 @@
-#include "lightingcolor.h"
+#include "basiclighting.h"
 
-LightingColor::LightingColor()
+BasicLighting::BasicLighting()
 {
     isOpenGLInited = false;
     tmp = 0.0;
@@ -9,18 +9,22 @@ LightingColor::LightingColor()
     setAnimating(false);
     connect(this,SIGNAL(sigKeyPress(QKeyEvent*)),this,SLOT(slotKeyPress(QKeyEvent*)));
     connect(this,SIGNAL(sigMousePress(QEvent*)),this,SLOT(slotMousePress(QEvent*)));
-//    cameraSpeed = 2.5f * 10;
+
     yaw = -90.0f;
     pitch = 0;
+    fov = 30;
     sensitivity = 0.00001f;
     lastX = width()/2;
     lastY = height()/2;
 
-//    setAnimating(true);
+    specularStrength = 0.5;
+//glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
+    setAnimating(true);
 
 }
 
-void LightingColor::initialize()
+void BasicLighting::initialize()
 {
     qDebug("HelloTriangle::initialize()");
 
@@ -28,7 +32,7 @@ void LightingColor::initialize()
     initOpenGL();
 }
 
-void LightingColor::render()
+void BasicLighting::render()
 {
 
 
@@ -37,23 +41,19 @@ void LightingColor::render()
     glClear(GL_COLOR_BUFFER_BIT  | GL_DEPTH_BUFFER_BIT  );
 
     tmp+=1;
-    fTmp2 += 0.01f;
-
-
-
-
+//    fTmp2 += 0.01f;
 
     QMatrix4x4 projection;
-    projection.perspective(30.0f, width()/height(), 0.1f, 100.0f);
+    projection.perspective(fov, width()/height(), 0.1f, 100.0f);
 
-    QMatrix4x4 view;
+    QMatrix4x4 view,viewCamera;
 
     const float radius = 10.0f;
     float camX = qSin(fTmp2) * radius;
     float camZ = qCos(fTmp2) * radius;
 
-    view.lookAt(QVector3D(camX, 0.0,camZ), QVector3D(0.0, 0.0, 0.0),QVector3D(0.0, 1.0, 0.0));
-//    view.lookAt(*cameraPos+QVector3D(camX, 0.0, camZ), (*cameraPos + *cameraFront)-QVector3D(camX, 0.0, camZ), *cameraUp);
+//    view.lookAt(QVector3D(camX, 0.0,camZ), QVector3D(0.0, 0.0, 0.0),QVector3D(0.0, 1.0, 0.0));
+//    view.lookAt(*cameraPos+QVector3D(camX, 0.0, camZ), (*cameraPos + *cameraFront), *cameraUp);
 
     // [] YAW, PITCH
 
@@ -65,7 +65,8 @@ void LightingColor::render()
     // ![]
 
 //    view.lookAt(*cameraPos, (*cameraPos + *cameraFront), *cameraUp);
-//    view.lookAt(*cameraPos, *cameraPos + cameraDirection, *cameraUp);
+    viewCamera.lookAt(*cameraPos, *cameraPos + cameraDirection, *cameraUp);
+//     viewCamera.lookAt(QVector3D(camX, 0.0,camZ), QVector3D(0.0, 0.0, 0.0),QVector3D(0.0, 1.0, 0.0));
 
 //    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
 
@@ -85,11 +86,14 @@ void LightingColor::render()
     for(unsigned int i = 0; i < sizeof(cubePositions)/sizeof(*cubePositions); i++)
     {
         QMatrix4x4 model;
-//        model.translate(cubePositions[i]);
+        model.translate(cubePositions[i]);
         float angle = 20.0f * i;
-        model.rotate(45 , 1.0f, 0.3f, 0.5f);
-//        model.rotate(tmp , 1.0f, 0.3f, 0.5f);
-
+//        model.rotate(45 , 1.0f, 0.3f, 0.5f);
+        if (i%2){
+            model.rotate(tmp , 1.0f, 0.3f, 0.5f);
+        } else {
+            model.rotate(-tmp , 1.0f, 0.3f, 0.5f);
+        }
 
         // color
          lightingShader->use();
@@ -97,28 +101,33 @@ void LightingColor::render()
         lightingShader->setVec3("lightColor",  1.0f, 1.0f, 1.0f);
 
         lightingShader->setMat4("projection", projection.data());
-        lightingShader->setMat4("view", view.data());
+        lightingShader->setMat4("view", viewCamera.data());
 //        model.translate(-0.5f,0.0f,0.0f);
+
+        lightingShader->setVec3("lightPos", 1.2f, 1.0f, 2.0f);
+        lightingShader->setVec3("viewPos",viewCamera.data());
 
         lightingShader->setMat4("model", model.data());
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        // cube
-        lightCubeShader->use();
-        model.setToIdentity();
-        model.rotate(45 , 1.0f, 0.3f, 0.5f);
-        lightCubeShader->setMat4("model", model.data());
-        lightCubeShader->setMat4("projection", projection.data());
-        lightCubeShader->setMat4("view", view.data());
-         model.translate(1.2f,1.0f,1.0f);
-        model.scale(0.2f);
-//        model.rotate(-tmp , 1.0f, 0.3f, 0.5f);
-        lightCubeShader->setMat4("model", model.data());
 
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
     }
+    // cube
+     QMatrix4x4 model;
+    lightCubeShader->use();
+    model.setToIdentity();
+    model.rotate(45 , 1.0f, 0.3f, 0.5f);
+    lightCubeShader->setMat4("model", model.data());
+    lightCubeShader->setMat4("projection", projection.data());
+    lightCubeShader->setMat4("view", viewCamera.data());
+    model.translate(1.2f,1.0f,1.0f); // lightpos
+    model.scale(0.2f);
+    //        model.rotate(-tmp , 1.0f, 0.3f, 0.5f);
+    lightCubeShader->setMat4("model", model.data());
+
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
 //    ourShader->setMat4("transform",matrix.data());
 
@@ -126,7 +135,7 @@ void LightingColor::render()
 //    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void LightingColor::initOpenGL()
+void BasicLighting::initOpenGL()
 {
     if (isOpenGLInited){
         return;
@@ -142,47 +151,47 @@ void LightingColor::initOpenGL()
     qDebug("Maximum nr of vertex attributes supported: %d", nrAttributes);
 
     float vertices[] = {
-        -0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f,  0.5f, -0.5f,
-        0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-        -0.5f, -0.5f,  0.5f,
-        0.5f, -0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-        0.5f,  0.5f,  0.5f,
-        0.5f,  0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-        -0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f,  0.5f,
-        0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-        -0.5f,  0.5f, -0.5f,
-        0.5f,  0.5f, -0.5f,
-        0.5f,  0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
 
 //    unsigned int indices[] = {  // note that we start from 0!
@@ -214,88 +223,24 @@ void LightingColor::initOpenGL()
 //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-
-    // [TEXTURE] =============
- /*   // texture 1
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-//    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-
-    QImage* img = new QImage(path+ "wall.jpg");
-
-//    QImage* img = new QImage("C:/Users/cong.tran/Documents/LearningOpenGL/test.png");
-    // QImage use 32 bit. but glTexImage2D need 24 bit
-    *img = img->convertToFormat(QImage::Format_RGBA8888, Qt::AutoColor);
-    uchar* data = img->bits();
-    if (data)
-    {
-        qDebug("width: %d, height: %d", img->width(),img->height());
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width(),img->height() , 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        qDebug("Failed to load texture");
-    }
-
-    // texture 2
-//    unsigned int texture2;
-    glGenTextures(1, &texture2);
-
-    glBindTexture(GL_TEXTURE_2D, texture2); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-//    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-
-    QImage* img2 = new QImage(path+ "container.png");
-
-//    QImage* img2 = new QImage("C:/Users/cong.tran/Documents/LearningOpenGL/test.png");
-    // QImage use 32 bit. but glTexImage2D need 24 bit
-    *img2 = img2->convertToFormat(QImage::Format_RGBA8888);
-    uchar* data2 = img2->bits();
-    if (data2)
-    {
-        qDebug("width: %d, height: %d", img2->width(),img2->height());
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img2->width(),img2->height() , 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        qDebug("Failed to load texture");
-    }*/
-  // ![TEXTURE] =============
     //[1-2-3] init in ourShader
-    QString sTmp = path + "1.light_cube.vs";
-    QString sTmp2 = path + "1.light_cube.fs";
+    QString sTmp = path + "2.2.light_cube.vs";
+    QString sTmp2 = path + "2.2.light_cube.fs";
 //    ourShader = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
     lightCubeShader = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
-    sTmp = path + "1.colors.vs";
-    sTmp2 = path + "1.colors.fs";
+    sTmp = path + "2.2.basic_lighting.vs";
+    sTmp2 = path + "2.2.basic_lighting.fs";
 
     lightingShader  = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
     // [4] Set Data to Array
     // get the attribute location with glGetAttribLocation
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-//    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*sizeof(float)));
-//    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
 //    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 //    glEnableVertexAttribArray(2);
 
@@ -310,10 +255,10 @@ void LightingColor::initOpenGL()
     glEnableVertexAttribArray(0);
 //    cameraUp.crossProduct(cameraDirection, cameraRight).normalize();
 
-    cameraPos   = new QVector3D(5.0f, 0.0f,  -30.0f);
+    cameraPos   = new QVector3D(2.5f, 0.0f,  -10.0f);
     cameraFront = new QVector3D(0.0f, 0.0f, -1.0f);
     cameraUp    = new QVector3D(0.0f, 1.0f,  0.0f);
-//    cameraSpeed = 24/screen()->refreshRate();
+    cameraSpeed = 24/screen()->refreshRate();
 
 //    cameraDirection = cameraDirection.normalized();
 
@@ -356,12 +301,12 @@ void LightingColor::initOpenGL()
 //    delete img2;
 }
 
-void LightingColor::freePoint()
+void BasicLighting::freePoint()
 {
 
 }
 
-void LightingColor::slotKeyPress(QKeyEvent *key)
+void BasicLighting::slotKeyPress(QKeyEvent *key)
 {
     qDebug()<< "Camera::KeyPress: " << key->key();
     switch (key->key()) {
@@ -423,15 +368,18 @@ void LightingColor::slotKeyPress(QKeyEvent *key)
         if (key->text().compare("w") == 0 ){
             pitch   += 0.0001f;
         }
-        if (key->text().compare("w") == 0 ){
-            pitch   += 0.0001f;
+        if (key->text().compare("z") == 0 ){
+            fov   += 0.5f;
+        }
+        if (key->text().compare("x") == 0 ){
+            fov   -= 0.5f;
         }
     }
     }
     requestUpdate();
 }
 
-void LightingColor::slotMousePress(QEvent *event)
+void BasicLighting::slotMousePress(QEvent *event)
 {
     QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
     switch (event->type()) {
@@ -483,4 +431,3 @@ void LightingColor::slotMousePress(QEvent *event)
         return;
     }
 }
-

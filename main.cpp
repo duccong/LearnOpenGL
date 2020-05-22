@@ -7,12 +7,13 @@
 #include <coordinatesystems.h>
 #include <camera.h>
 #include <lightingcolor.h>
+#include <basiclighting.h>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     //[1]
-    LightingColor w;
+    BasicLighting w;
 
     //[2]
     // set SurfaceFormat
