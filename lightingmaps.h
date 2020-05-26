@@ -1,13 +1,13 @@
-#ifndef LIGHTINGMATERIALS_H
-#define LIGHTINGMATERIALS_H
+#ifndef LIGHTINGMAPS_H
+#define LIGHTINGMAPS_H
 #include <openglwindow.h>
 #include <shader.h>
 
-class LightingMaterials: public OpenGLWindow
+class LightingMaps: public OpenGLWindow
 {
     Q_OBJECT
 public:
-    LightingMaterials();
+    LightingMaps();
 
     void initialize() override;
     void render() override;
@@ -41,7 +41,6 @@ private:
     unsigned int uiTmp;
     unsigned int texture;
     unsigned int texture2;
-    unsigned int diffuseMap;
     void freePoint();
     float cameraSpeed ;// = 2.5f * deltaTime;
     float yaw;
@@ -66,4 +65,5 @@ public slots:
     void slotMousePress(QEvent *event);
 
 };
-#endif // BASICLIGHTING_H
+
+#endif // LIGHTINGMAPS_H

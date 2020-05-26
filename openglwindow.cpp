@@ -200,5 +200,56 @@ void OpenGLWindow::setSurfaceFormat(QSurfaceFormat *fmt)
     m_fmt = fmt;
 }
 
+unsigned int OpenGLWindow::loadTexture(char const * path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    QImage* img = new QImage(path);
+    width = img->width();
+    height = img->height();
+//    nrComponents = img->al
+
+    *img = img->convertToFormat(QImage::Format_RGBA8888, Qt::AutoColor);
+//    if (data)
+//    {
+//        qDebug("width: %d, height: %d", img->width(),img->height());
+//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width(),img->height() , 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+//        glGenerateMipmap(GL_TEXTURE_2D);
+//    }
+    unsigned char *data = img->bits();
+    if (data)
+    {
+        GLenum format;
+//        if (nrComponents == 1)
+//            format = GL_RED;
+//        else if (nrComponents == 3)
+//            format = GL_RGB;
+//        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        free(img);
+        free(data);
+    }
+    else
+    {
+        qDebug()<< "Texture failed to load at path: " << path ;
+        free(img);
+        free(data);
+    }
+
+    return textureID;
+}
+
 //! [5]
 

@@ -9,12 +9,13 @@
 #include <lightingcolor.h>
 #include <basiclighting.h>
 #include <lightingmaterials.h>
+#include <lightingmaps.h>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     //[1]
-    LightingMaterials w;
+    LightingMaps w;
 
     //[2]
     // set SurfaceFormat

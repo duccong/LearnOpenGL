@@ -80,6 +80,7 @@ public:
 
     void setAnimating(bool animating);
     void setSurfaceFormat(QSurfaceFormat *fmt);
+    unsigned int loadTexture(char const * path);
 
 public slots:
     void renderLater();
