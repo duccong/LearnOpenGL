@@ -37,7 +37,8 @@ SOURCES += \
     lightingcolor.cpp \
     basiclighting.cpp \
     lightingmaterials.cpp \
-    lightingmaps.cpp
+    lightingmaps.cpp \
+    lightcaster.cpp
 
 HEADERS += \
     openglwindow.h \
@@ -51,7 +52,8 @@ HEADERS += \
     lightingcolor.h \
     basiclighting.h \
     lightingmaterials.h \
-    lightingmaps.h
+    lightingmaps.h \
+    lightcaster.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -91,4 +93,9 @@ DISTFILES += \
     4.1.lighting_maps.fs \
     4.1.light_cube.vs \
     4.1.light_cube.fs \
-    container2.png
+    container2.png \
+    container2_specular.png \
+    5.1.light_cube.fs \
+    5.1.light_cube.vs \
+    5.1.light_casters.fs \
+    5.1.light_casters.vs

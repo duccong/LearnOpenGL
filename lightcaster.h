@@ -1,13 +1,13 @@
-#ifndef LIGHTINGMAPS_H
-#define LIGHTINGMAPS_H
+#ifndef LIGHTCASTER_H
+#define LIGHTCASTER_H
 #include <openglwindow.h>
 #include <shader.h>
 
-class LightingMaps: public OpenGLWindow
+class LightCaster: public OpenGLWindow
 {
     Q_OBJECT
 public:
-    LightingMaps();
+    LightCaster();
 
     void initialize() override;
     void render() override;
@@ -68,4 +68,4 @@ public slots:
 
 };
 
-#endif // LIGHTINGMAPS_H
+#endif // LIGHTCASTER_H

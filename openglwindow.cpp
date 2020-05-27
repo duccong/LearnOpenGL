@@ -209,6 +209,11 @@ unsigned int OpenGLWindow::loadTexture(char const * path)
     QImage* img = new QImage(path);
     width = img->width();
     height = img->height();
+
+//    if (!QFile::exists(tmpss+"_bk.png")){
+//        img->save(tmpss+"_bk.png");
+//    }
+
 //    nrComponents = img->al
 
     *img = img->convertToFormat(QImage::Format_RGBA8888, Qt::AutoColor);

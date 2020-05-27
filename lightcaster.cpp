@@ -1,6 +1,6 @@
-#include "lightingmaps.h"
+#include "lightcaster.h"
 
-LightingMaps::LightingMaps()
+LightCaster::LightCaster()
 {
     isOpenGLInited = false;
     tmp = 0.0;
@@ -26,7 +26,7 @@ LightingMaps::LightingMaps()
 
 }
 
-void LightingMaps::initialize()
+void LightCaster::initialize()
 {
     qDebug("HelloTriangle::initialize()");
 
@@ -34,7 +34,7 @@ void LightingMaps::initialize()
     initOpenGL();
 }
 
-void LightingMaps::render()
+void LightCaster::render()
 {
   //    qDebug("HelloTriangle::render()");
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -45,7 +45,7 @@ void LightingMaps::render()
     fTmp3 += 0.001f;
 
     QMatrix4x4 projection;
-    projection.perspective(30, width()/height(), 0.1f, 100.0f);
+    projection.perspective(fov, width()/height(), 0.1f, 100.0f);
 
     QMatrix4x4 view,viewCamera;
 
@@ -115,7 +115,7 @@ void LightingMaps::render()
    lightingShader->setVec3("light.ambient",  0.2f,0.2f,0.2f);
    lightingShader->setVec3("light.diffuse",  0.5f,0.5f,0.5f); // darken diffuse light a bit
    lightingShader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-   lightingShader->setVec3("light.position",1.2f, 1.0f, 2.0f);
+   lightingShader->setVec3("light.position",fTmp3/*1.2f*/, -0.5f, 2.0f);
 
    lightingShader->setInt("material.diffuse", 0);
    glActiveTexture(GL_TEXTURE0);
@@ -152,12 +152,12 @@ void LightingMaps::render()
     lightCubeShader->setMat4("model", model.data());
     lightCubeShader->setMat4("projection", projection.data());
     lightCubeShader->setMat4("view", viewCamera.data());
-    model.translate(1.2f,1.0f,1.0f); // lightpos
+    model.translate(fTmp3/*1.2f*/,-0.5f,1.0f); // lightpos
     model.scale(0.2f);
     //        model.rotate(-tmp , 1.0f, 0.3f, 0.5f);
     lightCubeShader->setMat4("model", model.data());
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(lightCubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
 //    ourShader->setMat4("transform",matrix.data());
@@ -166,7 +166,7 @@ void LightingMaps::render()
 //    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void LightingMaps::initOpenGL()
+void LightCaster::initOpenGL()
 {
     if (isOpenGLInited){
         return;
@@ -256,14 +256,14 @@ void LightingMaps::initOpenGL()
 //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     //[1-2-3] init in ourShader
-    QString sTmp = path + "4.1.lighting_maps.vs";
-    QString sTmp2 = path + "4.1.lighting_maps.fs";
+    QString sTmp = path + "5.1.light_casters.vs";
+    QString sTmp2 = path + "5.1.light_casters.fs";
 //    ourShader = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
     lightCubeShader = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
-    sTmp = path + "4.1.light_cube.vs";
-    sTmp2 = path + "4.1.light_cube.fs";
+    sTmp = path + "5.1.light_cube.vs";
+    sTmp2 = path + "5.1.light_cube.fs";
 
     lightingShader  = new Shader(sTmp.toLocal8Bit().data(), sTmp2.toLocal8Bit().data());
 
@@ -282,9 +282,11 @@ void LightingMaps::initOpenGL()
 
     // we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+//    glEnableVertexAttribArray(0);
 //    cameraUp.crossProduct(cameraDirection, cameraRight).normalize();
 
     cameraPos   = new QVector3D(5.0f, 0.0f,  -30.0f);
@@ -298,36 +300,6 @@ void LightingMaps::initOpenGL()
     sTmpTexture = path+"container2_specular.png";
     specularMap = loadTexture(sTmpTexture.toLocal8Bit().data());
 
-
-    // setup view
-//    ourShader->use();
-//    QMatrix4x4 view;
-//    QMatrix4x4 projection;
-//    view.translate(0.0f, 0.0f, -3.0f);
-//    projection.ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
-//    projection.perspective(45.0f, width()/height(), 0.1f, 100.0f);
-//    unsigned int viewLoc  = glGetUniformLocation(ourShader->ID, "viewTmp");
-//    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
-//    ourShader->setMat4("projection", projection.data());
-
-//    QMatrix4x4 viewCamera;
-//    viewCamera.lookAt(QVector3D(0.0f, 0.0f, 3.0f),
-//                      QVector3D(0.0f, 0.0f, 0.0f),
-//                      QVector3D(0.0f, 1.0f, 0.0f));
-
-    // ===================== Load our shader
-//    ourShader->use();
-//    ourShader->setInt("texture1", 0);
-//    ourShader->setInt("texture2", 1);
-
-//    glActiveTexture(GL_TEXTURE0);
-//    glBindTexture(GL_TEXTURE_2D, texture2);
-
-//    glActiveTexture(GL_TEXTURE1);
-//    glBindTexture(GL_TEXTURE_2D, texture);
-
-
-
     glViewport(0,0,width(),height());
     //
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -338,12 +310,12 @@ void LightingMaps::initOpenGL()
 //    delete img2;
 }
 
-void LightingMaps::freePoint()
+void LightCaster::freePoint()
 {
 
 }
 
-void LightingMaps::slotKeyPress(QKeyEvent *key)
+void LightCaster::slotKeyPress(QKeyEvent *key)
 {
     qDebug()<< "Camera::KeyPress: " << key->key();
     switch (key->key()) {
@@ -419,6 +391,14 @@ void LightingMaps::slotKeyPress(QKeyEvent *key)
             fTmp4   -= 0.5f;
             qDebug()<< "Camera::KeyPress: fTmp4" << fTmp4;
         }
+        if (key->text().compare("k") == 0 ){
+            fTmp3   -= 0.1f;
+            qDebug()<< "Camera::KeyPress: fTmp4" << fTmp4;
+        }
+        if (key->text().compare("l") == 0 ){
+            fTmp3   += 0.1f;
+            qDebug()<< "Camera::KeyPress: fTmp4" << fTmp4;
+        }
     }
     }
     if (fov < 1.0f)
@@ -428,7 +408,7 @@ void LightingMaps::slotKeyPress(QKeyEvent *key)
     requestUpdate();
 }
 
-void LightingMaps::slotMousePress(QEvent *event)
+void LightCaster::slotMousePress(QEvent *event)
 {
     QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
     switch (event->type()) {
